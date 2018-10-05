@@ -3,14 +3,14 @@
 Install wagtail-metadata using setuptools
 """
 
+from setuptools import find_packages, setup
+
 with open('README.rst', 'r') as f:
     readme = f.read()
 
-from setuptools import find_packages, setup
-
 setup(
     name='wagtail-metadata',
-    version='0.3.1',
+    version='2.0.1',
     description="A tool to assist with metadata for social media.",
     long_description=readme,
     author='Liam Brenner',
@@ -18,11 +18,11 @@ setup(
     url='https://github.com/takeflight/wagtail-metadata',
 
     install_requires=[
-        'wagtail>=1.6',
+        'wagtail~=2.0',
     ],
     zip_safe=False,
     license='BSD License',
-
+    python_requires='>=3',
     packages=find_packages(exclude=['tests', 'tests*']),
 
     include_package_data=True,

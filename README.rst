@@ -1,17 +1,38 @@
-===============
+================
 wagtail-metadata
-===============
+================
 
 A tool to assist with metadata for social media and search engines.
+
+Compatibility
+=============
+
+Wagtail-metadata works with Wagtail v2.0 and upwards.
 
 Installing
 ==========
 
-Install using pip::
+First, install using pip::
 
     pip install wagtail-metadata
 
-It works with Wagtail 1.6 and upwards.
+Then add ``wagtailmetadata`` to your project's ``INSTALLED_APPS``:
+
+.. code-block:: python
+
+    INSTALLED_APPS = [
+        'home',
+        'search',
+        # etc...
+
+        'wagtail.contrib.settings',
+        'wagtail.contrib.modeladmin',
+        # etc...
+
+        # Add the following:
+        'wagtailmetadata',
+
+    ]
 
 Using
 =====
@@ -24,7 +45,7 @@ Metadata for the page will then be built from the page details.
 
 .. code-block:: python
 
-    from wagtail.wagtailcore.models import Page
+    from wagtail.core.models import Page
     from wagtailmetadata.models import MetadataPageMixin
 
     class ContentPage(MetadataPageMixin, Page):
@@ -82,7 +103,7 @@ Django
 To use this in a template, first load the template tag library,
 and then insert the metadata by placing ``{% meta_tags %}`` into the ``<head>``:
 
-.. code-block:: html
+.. code-block:: html+django
 
     {% load wagtailmetadata_tags %}
     {% meta_tags %}
@@ -90,7 +111,7 @@ and then insert the metadata by placing ``{% meta_tags %}`` into the ``<head>``:
 By default, this will look for a ``self`` object in the context to pull the metadata from.
 You can specify a different object to use if you need to:
 
-.. code-block:: html
+.. code-block:: html+django
 
     {% load wagtailmetadata_tags %}
     {% meta_tags my_custom_object %}
@@ -126,3 +147,55 @@ You can specify a different object to use if you need to:
 .. code-block:: html
 
     {{ meta_tags(my_custom_object) }}
+
+Adding extra tags
+=================
+
+If you need to add extra meta tags, to add the twitter:site tag for example,
+you can extend the Wagtail Metadata template.
+First, create any models that you might need to hold the extra data:
+
+.. code-block:: python
+
+    from wagtail.contrib.settings.models import BaseSetting, register_setting
+
+    @register_setting
+    class TwitterName(BaseSetting):
+        handle = models.CharField(max_length=20)
+
+You could also add extra fields to a page model and output them as meta tags:
+
+.. code-block:: python
+
+    class MyPage(MetadataPageMixin, Page):
+        body = RichTextField()
+        author_twitter_handle = models.CharField(max_length=20)
+
+Then, override the ``wagtailmetadata/parts/tags.html`` template
+and add your tags to the relevant blocks:
+
+.. code-block:: html
+
+    {% extends "wagtailmetadata/parts/tags.html" %}
+
+    {% block twitter %}
+        {{ block.super }}
+        <meta name="twitter:site" content="@{{ settings.myapp.TwitterName.twitter_handle }}" />
+        <meta name="twitter:creator" content="@{{ model.author_twitter_handle }}" />
+    {% endblock %}
+
+The ``wagtailmetadata/parts/tags.html`` template defines the following blocks
+you can override or extend:
+
+``{% block tags %}``
+    This block surrounds the whole template.
+    You can override this block to append extra tags before or after the standard tags.
+
+``{% block twitter %}``
+    This block surrounds the Twitter card tags.
+
+``{% block opengraph %}``
+    This block surrounds the Open Graph tags
+
+``{% block meta %}``
+    This block surrounds the standard meta tags defined in HTML.

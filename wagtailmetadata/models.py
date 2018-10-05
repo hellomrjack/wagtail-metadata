@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy
-from wagtail.contrib.settings.models import BaseSetting, register_setting
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, MultiFieldPanel
-from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel
+from wagtail.images.edit_handlers import ImageChooserPanel
 
 from .utils import get_image_model_string
 
@@ -49,7 +48,8 @@ class MetadataPageMixin(MetadataMixin, models.Model):
         null=True,
         blank=True,
         related_name='+',
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        verbose_name=ugettext_lazy('Search image')
     )
 
     promote_panels = [
@@ -76,14 +76,3 @@ class MetadataPageMixin(MetadataMixin, models.Model):
 
     class Meta:
         abstract = True
-
-
-@register_setting
-class MetadataSettings(BaseSetting):
-    twitter_handle = models.CharField(max_length=16, blank=True, null=True, help_text='Not including the @ symbol')
-    fb_app_id = models.CharField(max_length=128, blank=True, null=True)
-
-    panels = [
-        FieldPanel('twitter_handle'),
-        FieldPanel('fb_app_id')
-    ]
